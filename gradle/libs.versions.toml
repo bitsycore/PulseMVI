@@ -7,7 +7,7 @@
 # =========================================
 # MARK: KMP
 
-kotlin = "2.3.20" # Wait to 2.3.20 for 0.7.0 Compose Stability Analyzer to fix build
+kotlin = "2.3.20"
 
 # KotlinX
 kotlinxCollectionsImmutable = "0.4.0"

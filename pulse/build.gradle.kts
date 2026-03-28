@@ -9,6 +9,10 @@ val javaVersion: JavaVersion by rootProject.extra
 
 kotlin {
 
+	// ================================
+	// MARK: Android
+	// ================================
+
 	androidLibrary {
 		compileSdk = rootProject.extra["compileSdk"] as Int
 		minSdk = rootProject.extra["minSdk"] as Int
@@ -18,34 +22,62 @@ kotlin {
 		}
 	}
 
+	// ================================
+	// MARK: JVM
+	// ================================
+
     jvm {
         compilerOptions {
             jvmTarget = JvmTarget.fromTarget(javaVersion.toString())
         }
     }
 
-	// iOS
-	iosArm64()
-	iosSimulatorArm64()
-	iosX64()
+	// ================================
+	// MARK: Native
+	// ================================
 
 	// macOS
 	macosArm64()
-
+	// iOS
+	watchosArm64()
+	watchosSimulatorArm64()
+	tvosArm64()
+	tvosSimulatorArm64()
+	iosArm64()
+	iosSimulatorArm64()
+	iosX64()
 	// Linux
 	linuxArm64()
 	linuxX64()
-
 	// Windows
 	mingwX64()
+	// Android
+	androidNativeX64()
+	androidNativeX86()
+	androidNativeArm32()
+	androidNativeArm64()
 
-	// watchOS
-	watchosArm64()
-	watchosSimulatorArm64()
+	// ================================
+	// MARK: Web
+	// ================================
 
-	// tvOS
-	tvosArm64()
-	tvosSimulatorArm64()
+	js {
+		browser()
+		nodejs()
+	}
+	@Suppress("OPT_IN_USAGE")
+	wasmJs {
+		browser()
+		nodejs()
+	}
+	@Suppress("OPT_IN_USAGE")
+	wasmWasi {
+		nodejs()
+	}
+
+	// ================================
+	// MARK: Dependencies
+	// ================================
 
 	sourceSets {
 		commonMain.dependencies {

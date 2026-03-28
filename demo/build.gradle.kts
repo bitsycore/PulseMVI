@@ -20,11 +20,10 @@ kotlin {
 
 	sourceSets {
 		commonMain.dependencies {
-			implementation(project(":pulse"))
-			implementation(project(":pulse-viewmodel"))
-			implementation(project(":pulse-compose"))
-			implementation(project(":pulse-savedstate"))
-
+			implementation(projects.pulse)
+			implementation(projects.pulseViewmodel)
+			implementation(projects.pulseCompose)
+			implementation(projects.pulseSavedstate)
 			implementation(libs.jetbrains.compose.material3)
 			implementation(libs.jetbrains.compose.foundation)
 			implementation(libs.jetbrains.compose.ui)

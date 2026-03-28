@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -9,6 +10,10 @@ val javaVersion: JavaVersion by rootProject.extra
 
 kotlin {
 
+	// ================================
+	// MARK: Android
+	// ================================
+
 	androidLibrary {
 		compileSdk = rootProject.extra["compileSdk"] as Int
 		minSdk = rootProject.extra["minSdk"] as Int
@@ -18,19 +23,46 @@ kotlin {
 		}
 	}
 
+	// ================================
+	// MARK: JVM
+	// ================================
+
 	jvm {
 		compilerOptions {
 			jvmTarget = JvmTarget.fromTarget(javaVersion.toString())
 		}
 	}
 
+	// ================================
+	// MARK: Native
+	// ================================
+
 	iosArm64()
 	iosSimulatorArm64()
 	iosX64()
 
+	// ================================
+	// MARK: Web
+	// ================================
+
+	@OptIn(ExperimentalWasmDsl::class)
+	wasmJs {
+		browser()
+		nodejs()
+	}
+
+	js {
+		browser()
+		nodejs()
+	}
+
+	// ================================
+	// MARK: Dependencies
+	// ================================
+
 	sourceSets {
 		commonMain.dependencies {
-			api(project(":pulse"))
+			api(projects.pulse)
 			implementation(libs.jetbrains.androidx.lifecycle.viewmodel.compose)
 		}
 	}
