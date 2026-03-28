@@ -9,4 +9,4 @@ plugins {
 extra["compileSdk"] = 36
 extra["targetSdk"] = 36
 extra["minSdk"] = 24
-extra["javaVersion"] = JavaVersion.VERSION_21
+extra["javaVersion"] = JavaVersion.VERSION_11
