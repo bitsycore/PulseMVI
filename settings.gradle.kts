@@ -30,7 +30,7 @@ dependencyResolutionManagement {
 }
 
 
-rootProject.name = "PulseLib"
+rootProject.name = "PulseMVI"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
