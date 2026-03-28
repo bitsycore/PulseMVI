@@ -92,6 +92,5 @@ MyContract.containerTest(
 
 - Kotlin 2.3, KMP
 - Tabs for indentation
-- Experimental features enabled: context parameters, explicit backing fields
 - Package root: `com.bitsycore.lib.pulse`
 - Targets: pulse supports all major KMP targets (JVM, Android, iOS, macOS, Linux, Windows, watchOS, tvOS)
