@@ -33,11 +33,11 @@ class Page1ViewModel : Page1Contract.VM(Page1Contract) {
 			Intent.Reset -> emitEffect(Effect.ShowToast("Counter reset!"))
 
 			// Log all lifecycle events
-			Intent.OnCreated -> {
-				emitEffect(Effect.ShowToast("onCreate"))
-                println("[Page1][Lifecycle] onCreate")
+			Intent.OnCreated -> println("[Page1][Lifecycle] onCreate")
+			Intent.OnStarted -> {
+				emitEffect(Effect.ShowToast("onStart"))
+                println("[Page1][Lifecycle] onStart")
             }
-			Intent.OnStarted -> println("[Page1][Lifecycle] onStart")
 			Intent.OnResumed -> println("[Page1][Lifecycle] onResume")
 			Intent.OnPaused -> println("[Page1][Lifecycle] onPause")
 			Intent.OnStopped -> println("[Page1][Lifecycle] onStop")
@@ -50,5 +50,10 @@ class Page1ViewModel : Page1Contract.VM(Page1Contract) {
 
 			else -> {}
 		}
+	}
+
+
+	override fun onCleared() {
+		println("[Page1][ViewModel] onCleared")
 	}
 }

@@ -10,7 +10,10 @@ class Page2ViewModel : Page2Contract.VM(Page2Contract) {
 	override suspend fun handleIntent(intent: Intent) {
 		when (intent) {
 			// Log all lifecycle events
-			Intent.OnCreated -> println("[Page2][Lifecycle] onCreate")
+			Intent.OnCreated -> {
+                emitEffect(Page2Contract.Effect.ShowToast("onCreate"))
+				println("[Page2][Lifecycle] onCreate")
+            }
 			Intent.OnStarted -> println("[Page2][Lifecycle] onStart")
 			Intent.OnResumed -> println("[Page2][Lifecycle] onResume")
 			Intent.OnPaused -> println("[Page2][Lifecycle] onPause")
@@ -22,5 +25,9 @@ class Page2ViewModel : Page2Contract.VM(Page2Contract) {
 			Intent.OnScreenRecomposed -> println("[Page2][Composition] onRecompose")
 			Intent.OnScreenExited -> println("[Page2][Composition] onExit")
 		}
+	}
+
+	override fun onCleared() {
+		println("[Page2][ViewModel] onCleared")
 	}
 }

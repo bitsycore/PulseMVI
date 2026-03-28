@@ -28,6 +28,7 @@ kotlin {
 			implementation(libs.jetbrains.compose.ui)
 			implementation(libs.jetbrains.androidx.lifecycle.viewmodel.compose)
 			implementation(libs.jetbrains.androidx.navigation3.ui)
+			implementation(libs.jetbrains.androidx.lifecycle.viewmodel.navigation3)
 		}
 
 		jvmMain.dependencies {

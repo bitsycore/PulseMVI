@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(./gradlew.bat :pulse:jvmJar)"
+      "Bash(./gradlew.bat :pulse:jvmJar)",
+      "WebSearch"
     ]
   }
 }

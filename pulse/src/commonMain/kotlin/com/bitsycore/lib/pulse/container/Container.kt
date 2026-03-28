@@ -3,14 +3,16 @@ package com.bitsycore.lib.pulse.container
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.concurrent.atomics.AtomicBoolean
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.time.Duration
 
 /**
@@ -29,14 +31,15 @@ import kotlin.time.Duration
  */
 abstract class Container<STATE : Any, INTENT : Any, EFFECT : Any>(
 	containerContract: ContainerContract<STATE, INTENT, EFFECT>,
-	val coroutineScope: CoroutineScope
+	val coroutineScope: CoroutineScope,
+	replayUnconsumed : Int = 4
 ) : ContainerHost<STATE, INTENT, EFFECT> {
 
 	private val stateMutableFlow = MutableStateFlow(containerContract.initialState)
 	override val stateFlow: StateFlow<STATE> = stateMutableFlow.asStateFlow()
 
-	private val effectMutableFlow = MutableSharedFlow<EFFECT>(extraBufferCapacity = 8)
-	override val effectFlow: SharedFlow<EFFECT> = effectMutableFlow.asSharedFlow()
+	private val effectMutableFlow = MutableSharedFlow<Consumable<EFFECT>>(replay = replayUnconsumed, extraBufferCapacity = 8)
+	override val effectFlow: Flow<EFFECT> = effectMutableFlow.mapNotNull { it.consume() }
 
 	/** Entry point for all UI-originated actions. Thread-safe. */
 	override fun dispatch(intent: INTENT) {
@@ -116,11 +119,29 @@ abstract class Container<STATE : Any, INTENT : Any, EFFECT : Any>(
 	/** Long operation handler. Override to perform async work (network, NFC, etc.). */
 	protected open suspend fun handleIntent(intent: INTENT) {}
 
-	/** Emits a one-time effect to the screen. Thread-safe. */
+	/** Emits a one-time effect to the screen. Thread-safe. Replay-safe via [Consumable]. */
 	fun emitEffect(effect: EFFECT) {
-		coroutineScope.launch { effectMutableFlow.emit(effect) }
+		coroutineScope.launch { effectMutableFlow.emit(Consumable(effect)) }
 	}
 
 	/** Convenience for updating state outside of the reducer (e.g., inside callbacks). */
 	fun updateState(block: STATE.() -> STATE) = stateMutableFlow.update(block)
+}
+
+/**
+ * A thread-safe wrapper that allows a value to be consumed exactly once.
+ *
+ * Used internally to wrap effects in a replay-capable [kotlinx.coroutines.flow.SharedFlow] so that
+ * late collectors (e.g. after config change) receive the last emitted effect,
+ * but it is never delivered twice.
+ */
+@OptIn(ExperimentalAtomicApi::class)
+private class Consumable<out T>(private val value: T) {
+	private val consumed = AtomicBoolean(false)
+
+	/**
+	 * Returns the wrapped value on first call, `null` on all subsequent calls.
+	 */
+	fun consume(): T? =
+		if (consumed.compareAndSet(expectedValue = false, newValue = true)) value else null
 }
