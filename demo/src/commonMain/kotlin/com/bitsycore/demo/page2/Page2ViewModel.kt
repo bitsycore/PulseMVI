@@ -1,5 +1,6 @@
 package com.bitsycore.demo.page2
 
+import androidx.lifecycle.Lifecycle
 import com.bitsycore.demo.page2.Page2Contract.Intent
 import com.bitsycore.demo.page2.Page2Contract.UiState
 
@@ -10,15 +11,20 @@ class Page2ViewModel : Page2Contract.VM(Page2Contract) {
 	override suspend fun handleIntent(intent: Intent) {
 		when (intent) {
 			// Log all lifecycle events
-			Intent.OnCreated -> {
-                emitEffect(Page2Contract.Effect.ShowToast("onCreate"))
-				println("[Page2][Lifecycle] onCreate")
+			is Intent.OnLifecycle -> {
+				when(intent.event) {
+					Lifecycle.Event.ON_CREATE -> {
+						emitEffect(Page2Contract.Effect.ShowToast("onCreate"))
+						println("[Page2][Lifecycle] onCreate")
+					}
+					Lifecycle.Event.ON_START -> println("[Page2][Lifecycle] onStart")
+					Lifecycle.Event.ON_RESUME -> println("[Page2][Lifecycle] onResume")
+					Lifecycle.Event.ON_PAUSE -> println("[Page2][Lifecycle] onPause")
+					Lifecycle.Event.ON_STOP -> println("[Page2][Lifecycle] onStop")
+					Lifecycle.Event.ON_DESTROY -> println("[Page2][Lifecycle] onDestroy")
+					else -> {}
+                }
             }
-			Intent.OnStarted -> println("[Page2][Lifecycle] onStart")
-			Intent.OnResumed -> println("[Page2][Lifecycle] onResume")
-			Intent.OnPaused -> println("[Page2][Lifecycle] onPause")
-			Intent.OnStopped -> println("[Page2][Lifecycle] onStop")
-			Intent.OnDestroyed -> println("[Page2][Lifecycle] onDestroy")
 
 			// Log all composition events
 			Intent.OnScreenEntered -> println("[Page2][Composition] onEnter")
@@ -26,7 +32,5 @@ class Page2ViewModel : Page2Contract.VM(Page2Contract) {
 		}
 	}
 
-	override fun onCleared() {
-		println("[Page2][ViewModel] onCleared")
-	}
+	override fun onCleared() = println("[Page2][ViewModel] onCleared")
 }

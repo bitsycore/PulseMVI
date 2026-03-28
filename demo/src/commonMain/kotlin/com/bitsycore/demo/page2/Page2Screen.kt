@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bitsycore.lib.pulse.compose.collectAsState
 import com.bitsycore.lib.pulse.compose.collectEffect
@@ -31,12 +32,13 @@ fun Page2Screen(
 	val snackbarHostState = remember { SnackbarHostState() }
 
 	viewModel.onLifecycleIntent {
-		onCreate { Page2Contract.Intent.OnCreated }
-		onStart { Page2Contract.Intent.OnStarted }
-		onResume { Page2Contract.Intent.OnResumed }
-		onPause { Page2Contract.Intent.OnPaused }
-		onStop { Page2Contract.Intent.OnStopped }
-		onDestroy { Page2Contract.Intent.OnDestroyed }
+		// Prefer Intent without lifecycle related name but for demo, simplify it
+		onCreate { Page2Contract.Intent.OnLifecycle(Lifecycle.Event.ON_CREATE) }
+		onStart { Page2Contract.Intent.OnLifecycle(Lifecycle.Event.ON_START) }
+		onResume { Page2Contract.Intent.OnLifecycle(Lifecycle.Event.ON_RESUME) }
+		onPause { Page2Contract.Intent.OnLifecycle(Lifecycle.Event.ON_PAUSE) }
+		onStop { Page2Contract.Intent.OnLifecycle(Lifecycle.Event.ON_STOP) }
+		onDestroy { Page2Contract.Intent.OnLifecycle(Lifecycle.Event.ON_DESTROY) }
 	}
 
 	viewModel.onCompositionIntent {

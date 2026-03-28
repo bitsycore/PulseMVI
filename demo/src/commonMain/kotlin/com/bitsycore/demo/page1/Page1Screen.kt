@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bitsycore.demo.colorpicker.ColorPickerContent
@@ -36,23 +37,23 @@ fun Page1Screen(
 	modifier: Modifier = Modifier,
 	viewModel: Page1ViewModel = viewModel { Page1ViewModel(createSavedStateHandle()) }
 ) {
-	// Lifecycle intents — fires on each Android/desktop lifecycle transition
+	val state by viewModel.collectAsState()
+	val snackbarHostState = remember { SnackbarHostState() }
+
 	viewModel.onLifecycleIntent {
-		onCreate { Page1Contract.Intent.OnCreated }
-		onStart { Page1Contract.Intent.OnStarted }
-		onResume { Page1Contract.Intent.OnResumed }
-		onPause { Page1Contract.Intent.OnPaused }
-		onStop { Page1Contract.Intent.OnStopped }
-		onDestroy { Page1Contract.Intent.OnDestroyed }
+		// Prefer Intent without lifecycle related name but for demo, simplify it
+		onCreate { Page1Contract.Intent.OnLifecycle(Lifecycle.Event.ON_CREATE) }
+		onStart { Page1Contract.Intent.OnLifecycle(Lifecycle.Event.ON_START) }
+		onResume { Page1Contract.Intent.OnLifecycle(Lifecycle.Event.ON_RESUME) }
+		onPause { Page1Contract.Intent.OnLifecycle(Lifecycle.Event.ON_PAUSE) }
+		onStop { Page1Contract.Intent.OnLifecycle(Lifecycle.Event.ON_STOP) }
+		onDestroy { Page1Contract.Intent.OnLifecycle(Lifecycle.Event.ON_DESTROY) }
 	}
 
-	// Composition intents — fires when this composable enters/exits the tree
 	viewModel.onCompositionIntent {
 		onEnter { Page1Contract.Intent.OnScreenEntered }
 		onExit { Page1Contract.Intent.OnScreenExited }
 	}
-
-	val snackbarHostState = remember { SnackbarHostState() }
 
 	viewModel.collectEffect { effect ->
 		when (effect) {
@@ -66,8 +67,6 @@ fun Page1Screen(
 			}
 		}
 	}
-
-	val state by viewModel.collectAsState()
 
 	Box(modifier.fillMaxSize()) {
 		MainContent(

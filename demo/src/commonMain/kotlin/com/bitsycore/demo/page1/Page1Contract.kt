@@ -1,5 +1,6 @@
 package com.bitsycore.demo.page1
 
+import androidx.lifecycle.Lifecycle
 import com.bitsycore.demo.colorpicker.ColorPickerComponent
 import com.bitsycore.lib.pulse.container.ContainerContract
 import com.bitsycore.lib.pulse.savedstate.PulseSavedStateViewModel
@@ -24,12 +25,8 @@ object Page1Contract : ContainerContract<Page1Contract.UiState, Page1Contract.In
 		data class ColorPicker(val intent: ColorPickerComponent.Intent) : Intent
 
 		// Lifecycle-driven
-		data object OnCreated : Intent
-		data object OnStarted : Intent
-		data object OnResumed : Intent
-		data object OnPaused : Intent
-		data object OnStopped : Intent
-		data object OnDestroyed : Intent
+		// Prefer Intent without lifecycle related name but for demo, simplify it
+		data class OnLifecycle(val event: Lifecycle.Event) : Intent
 
 		// Composition-driven
 		data object OnScreenEntered : Intent

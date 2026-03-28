@@ -1,5 +1,6 @@
 package com.bitsycore.demo.page1
 
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import com.bitsycore.demo.colorpicker.ColorPickerComponent
 import com.bitsycore.demo.page1.Page1Contract.Effect
@@ -23,12 +24,7 @@ class Page1ViewModel(savedStateHandle: SavedStateHandle) : Page1Contract.VM(
 		Intent.OnScreenEntered -> state.copy(
 			colorPicker = ColorPickerComponent.reduce(state.colorPicker, ColorPickerComponent.Intent.Randomize)
 		)
-		Intent.OnCreated,
-		Intent.OnStarted,
-		Intent.OnResumed,
-		Intent.OnPaused,
-		Intent.OnStopped,
-		Intent.OnDestroyed,
+		is Intent.OnLifecycle,
 		Intent.OnScreenExited -> state
 	}
 
@@ -37,15 +33,21 @@ class Page1ViewModel(savedStateHandle: SavedStateHandle) : Page1Contract.VM(
 			Intent.Reset -> emitEffect(Effect.ShowToast("Counter reset!"))
 
 			// Log all lifecycle events
-			Intent.OnCreated -> println("[Page1][Lifecycle] onCreate")
-			Intent.OnStarted -> {
-				emitEffect(Effect.ShowToast("onStart"))
-				println("[Page1][Lifecycle] onStart")
-			}
-			Intent.OnResumed -> println("[Page1][Lifecycle] onResume")
-			Intent.OnPaused -> println("[Page1][Lifecycle] onPause")
-			Intent.OnStopped -> println("[Page1][Lifecycle] onStop")
-			Intent.OnDestroyed -> println("[Page1][Lifecycle] onDestroy")
+			is Intent.OnLifecycle -> {
+				when(intent.event) {
+                    Lifecycle.Event.ON_CREATE -> println("[Page1][Lifecycle] onCreate")
+                    Lifecycle.Event.ON_START -> {
+						emitEffect(Effect.ShowToast("onStart"))
+						println("[Page1][Lifecycle] onStart")
+					}
+                    Lifecycle.Event.ON_RESUME -> println("[Page1][Lifecycle] onResume")
+                    Lifecycle.Event.ON_PAUSE -> println("[Page1][Lifecycle] onPause")
+                    Lifecycle.Event.ON_STOP -> println("[Page1][Lifecycle] onStop")
+                    Lifecycle.Event.ON_DESTROY -> println("[Page1][Lifecycle] onDestroy")
+                    else -> {}
+                }
+
+            }
 
 			// Log all composition events
 			Intent.OnScreenEntered -> println("[Page1][Composition] onEnter")
@@ -55,7 +57,5 @@ class Page1ViewModel(savedStateHandle: SavedStateHandle) : Page1Contract.VM(
 		}
 	}
 
-	override fun onCleared() {
-		println("[Page1][ViewModel] onCleared")
-	}
+	override fun onCleared() = println("[Page1][ViewModel] onCleared")
 }
