@@ -43,7 +43,7 @@ androidxNavigation = "2.9.2"
 # MARK: Android
 
 # Base Config
-agp = "8.13.2"
+agp = "9.1.0"
 desugar_jdk_libs = "2.1.5"
 
 # Compose

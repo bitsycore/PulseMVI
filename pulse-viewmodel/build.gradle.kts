@@ -14,7 +14,7 @@ kotlin {
 	// MARK: Android
 	// ================================
 
-	androidLibrary {
+	android {
 		compileSdk = rootProject.extra["compileSdk"] as Int
 		minSdk = rootProject.extra["minSdk"] as Int
 		namespace = "com.bitsycore.lib.pulse.viewmodel"
