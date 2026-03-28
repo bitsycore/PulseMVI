@@ -2,6 +2,9 @@ package com.bitsycore.demo.colorpicker
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +26,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -88,14 +94,30 @@ private fun ColorSlider(
 	color: Color,
 	onValueChange: (Float) -> Unit
 ) {
+	// Animation state lives in UI only
+	val animatable = remember { Animatable(value) }
+	val interacting = remember { mutableStateOf(false) }
+
+	// Animate toward the target value only when the user is NOT dragging
+	LaunchedEffect(value) {
+		if (interacting.value) animatable.snapTo(value)
+		else animatable.animateTo(value, animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = 200f))
+	}
+
 	Row(
 		verticalAlignment = Alignment.CenterVertically,
 		modifier = Modifier.fillMaxWidth()
 	) {
 		Text(label, style = MaterialTheme.typography.labelLarge, modifier = Modifier.width(20.dp))
 		Slider(
-			value = value,
-			onValueChange = onValueChange,
+			value = animatable.value,
+			onValueChange = {
+				interacting.value = true
+				onValueChange(it)
+			},
+			onValueChangeFinished = {
+				interacting.value = false
+			},
 			modifier = Modifier.weight(1f),
 			colors = SliderDefaults.colors(
 				thumbColor = color,
@@ -103,7 +125,7 @@ private fun ColorSlider(
 			)
 		)
 		Text(
-			"${(value * 255).toInt()}",
+			"${(animatable.value * 255).toInt()}",
 			style = MaterialTheme.typography.labelSmall,
 			modifier = Modifier.width(30.dp)
 		)
