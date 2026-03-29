@@ -28,18 +28,21 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.bitsycore.demo.pulse.colorpicker.ColorPickerComponent.State
 
 @Composable
 fun ColorPickerContent(
-	state: ColorPickerComponent.State,
+	state: State,
 	dispatch: (ColorPickerComponent.Intent) -> Unit
 ) {
 	Column(
@@ -135,17 +138,35 @@ private fun ColorSlider(
 
 @Preview
 @Composable
-private fun ColorPickerContentPreview() {
+private fun ColorPickerPreview() {
 	Surface(modifier = Modifier.fillMaxWidth()) {
+		var state by remember {
+			mutableStateOf(
+				State(
+					red = 0.5f,
+					green = 0.3f,
+					blue = 0.8f,
+					label = "Pick a color",
+					showHex = true
+				)
+			)
+		}
 		ColorPickerContent(
-			state = ColorPickerComponent.State(
-				red = 0.5f,
-				green = 0.3f,
-				blue = 0.8f,
-				label = "Pick a color",
-				showHex = true
-			),
-			dispatch = {}
+			state = state,
+			dispatch = { state = ColorPickerComponent.reduce(state, it) }
+		)
+	}
+}
+
+@Preview
+@Composable
+private fun ColorSliderPreview() {
+	Surface(modifier = Modifier.fillMaxWidth()) {
+		ColorSlider(
+			label = "R",
+			value = 0.5f,
+			color = Color.Red,
+			onValueChange = {}
 		)
 	}
 }

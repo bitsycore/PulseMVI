@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -77,4 +78,13 @@ private fun Page2Content(state: Page2Contract.UiState, dispatch: (Page2Contract.
 			style = MaterialTheme.typography.headlineMedium
 		)
 	}
+}
+
+@Preview
+@Composable
+private fun Page2Preview() {
+	Page2Content(
+		state = Page2Contract.UiState(),
+		dispatch = {  }
+	)
 }

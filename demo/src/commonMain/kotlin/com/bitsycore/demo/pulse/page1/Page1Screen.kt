@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.createSavedStateHandle
@@ -143,4 +144,13 @@ private fun Page1Content(
 			dispatch = { dispatch(Page1Contract.Intent.ColorPicker(it)) }
 		)
 	}
+}
+
+@Preview
+@Composable
+private fun Page1Preview() {
+	Page1Content(
+		state = Page1Contract.UiState(),
+		dispatch = {  }
+	)
 }
