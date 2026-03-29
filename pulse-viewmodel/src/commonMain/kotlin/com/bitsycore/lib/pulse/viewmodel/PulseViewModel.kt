@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.bitsycore.lib.pulse.container.Container
 import com.bitsycore.lib.pulse.container.ContainerContract
 import com.bitsycore.lib.pulse.container.ContainerHost
+import com.bitsycore.lib.pulse.internal.PulseDsl
+import com.bitsycore.lib.pulse.internal.UntypedIntentBuilderScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.time.Duration
@@ -29,6 +31,9 @@ abstract class PulseViewModel<STATE : Any, INTENT : Any, EFFECT : Any>(
 
 	override fun dispatchDebounced(intent: INTENT, delay: Duration, key: String?, skipIfUnchanged: Boolean, shareAcrossTypes: Boolean) =
 		container.dispatchDebounced(intent, delay, key, skipIfUnchanged, shareAcrossTypes)
+
+	@PulseDsl
+	protected fun dispatch(block: UntypedIntentBuilderScope<STATE, EFFECT>.() -> Unit) = container.dispatch(block)
 
 	protected open fun reduce(state: STATE, intent: INTENT): STATE = containerContract.reduce(state, intent)
 	protected open suspend fun handleIntent(intent: INTENT) {}

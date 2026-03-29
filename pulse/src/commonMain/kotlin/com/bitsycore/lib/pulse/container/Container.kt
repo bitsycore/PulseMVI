@@ -1,5 +1,6 @@
 package com.bitsycore.lib.pulse.container
 
+import com.bitsycore.lib.pulse.internal.UntypedIntentBuilderScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -46,6 +47,15 @@ abstract class Container<STATE : Any, INTENT : Any, EFFECT : Any>(
 	override fun dispatch(intent: INTENT) {
 		stateMutableFlow.update { reduce(it, intent) }
 		coroutineScope.launch { handleIntent(intent) }
+	}
+
+	fun dispatch(block: UntypedIntentBuilderScope<STATE, EFFECT>.() -> Unit) {
+		UntypedIntentBuilderScope(
+			stateMutableFlow,
+			coroutineScope
+		) { it: EFFECT ->
+			effectMutableFlow.emit(OneTimeConsumable(it))
+		}.apply(block).build()
 	}
 
 	private val debounceJobs = mutableMapOf<Any, Job>()
