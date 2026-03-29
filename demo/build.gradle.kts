@@ -53,8 +53,8 @@ kotlin {
 					":pulse-savedstate"
 				).forEach { lib ->
 					when (mode) {
-						"snapshot" -> implementation("$pulseGroup:$lib:$baseVersion-SNAPSHOT-+")
-						"release" -> implementation("$pulseGroup:$lib:$baseVersion")
+						"snapshot" -> implementation("$pulseGroup$lib:$baseVersion-SNAPSHOT-+")
+						"release" -> implementation("$pulseGroup$lib:$baseVersion")
 						"local" -> implementation(project(lib))
 						else -> error("Unknown pulse.demo.use=$mode")
 					}
