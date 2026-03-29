@@ -128,9 +128,12 @@ fun CounterContent(state: UiState, dispatch: (Intent) -> Unit) {
 
 `Container` is the MVI engine. It receives intents, runs them through a pure reducer for state transitions, then launches an async handler for side-effects.
 
-```
-UI --> dispatch(Intent) --> reduce() --> new State --> UI recomposes
-                        \-> handleIntent() --> async work --> emitEffect()
+```mermaid
+flowchart LR
+    UI["UI"] -->|"dispatch(Intent)"| R["reduce()"]
+    R -->|"new State"| UI2["UI recomposes"]
+    UI -->|"dispatch(Intent)"| H["handleIntent()"]
+    H -->|"async work"| E["emitEffect()"]
 ```
 
 - `reduce(state, intent)` -- Pure, synchronous. Returns the next state. No side-effects.
