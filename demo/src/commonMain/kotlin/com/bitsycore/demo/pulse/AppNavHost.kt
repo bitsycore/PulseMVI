@@ -48,11 +48,11 @@ import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDe
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.bitsycore.demo.pulse.generated.resources.Res
+import com.bitsycore.demo.pulse.generated.resources.ic_pulse
 import com.bitsycore.demo.pulse.page1.Page1Screen
 import com.bitsycore.demo.pulse.page2.Page2Screen
 import org.jetbrains.compose.resources.vectorResource
-import pulsemvi.demo.generated.resources.Res
-import pulsemvi.demo.generated.resources.ic_pulse
 
 private const val DURATION = 500
 
