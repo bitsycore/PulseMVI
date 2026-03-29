@@ -11,6 +11,7 @@ object Page2Contract : ContainerContract<Page2Contract.UiState, Page2Contract.In
 	typealias VM = PulseViewModel<UiState, Intent, Effect>
 
 	data class UiState(
+		val count: Int = 0,
 		val message: String = "Hello from Page 2",
 	)
 
@@ -23,6 +24,7 @@ object Page2Contract : ContainerContract<Page2Contract.UiState, Page2Contract.In
 		// Composition-driven
 		data object OnScreenEntered : Intent
 		data object OnScreenExited : Intent
+		data object Tick : Intent
 	}
 
 	sealed interface Effect {

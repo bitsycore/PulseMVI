@@ -4,7 +4,12 @@ import androidx.lifecycle.Lifecycle
 
 class Page2ViewModel : Page2Contract.VM(Page2Contract) {
 
-	override fun reduce(state: Page2Contract.UiState, intent: Page2Contract.Intent): Page2Contract.UiState = state
+	override fun reduce(state: Page2Contract.UiState, intent: Page2Contract.Intent): Page2Contract.UiState {
+		return when (intent) {
+            is Page2Contract.Intent.Tick -> state.copy(count = state.count + 1)
+            else -> state
+        }
+    }
 
 	override suspend fun handleIntent(intent: Page2Contract.Intent) {
 		when (intent) {
@@ -27,7 +32,8 @@ class Page2ViewModel : Page2Contract.VM(Page2Contract) {
 			// Log all composition events
 			Page2Contract.Intent.OnScreenEntered -> println("[Page2][Composition] onEnter")
 			Page2Contract.Intent.OnScreenExited -> println("[Page2][Composition] onExit")
-		}
+			else -> {}
+        }
 	}
 
 	override fun onCleared() = println("[Page2][ViewModel] onCleared")
