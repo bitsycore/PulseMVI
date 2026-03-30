@@ -49,16 +49,18 @@ kotlin {
 	// MARK: Web
 	// ================================
 
+	js {
+		browser()
+	}
+
 	@OptIn(ExperimentalWasmDsl::class)
 	wasmJs {
 		browser()
-		nodejs()
 	}
 
-	js {
-		browser()
-		nodejs()
-	}
+	// ================================
+	// MARK: Dependencies
+	// ================================
 
 	sourceSets {
 		commonMain.dependencies {

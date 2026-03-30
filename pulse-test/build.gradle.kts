@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -38,26 +39,9 @@ kotlin {
 	// MARK: Native
 	// ================================
 
-	// macOS
-	macosArm64()
-	// iOS
-	watchosArm64()
-	watchosSimulatorArm64()
-	tvosArm64()
-	tvosSimulatorArm64()
 	iosArm64()
 	iosSimulatorArm64()
 	iosX64()
-	// Linux
-	linuxArm64()
-	linuxX64()
-	// Windows
-	mingwX64()
-	// Android
-	androidNativeX64()
-	androidNativeX86()
-	androidNativeArm32()
-	androidNativeArm64()
 
 	// ================================
 	// MARK: Web
@@ -65,17 +49,16 @@ kotlin {
 
 	js {
 		browser()
-		nodejs()
 	}
-	@Suppress("OPT_IN_USAGE")
+
+	@OptIn(ExperimentalWasmDsl::class)
 	wasmJs {
 		browser()
-		nodejs()
 	}
-	@Suppress("OPT_IN_USAGE")
-	wasmWasi {
-		nodejs()
-	}
+
+	// ================================
+	// MARK: Dependencies
+	// ================================
 
 	sourceSets {
 		commonMain.dependencies {
