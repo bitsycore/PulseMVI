@@ -3,9 +3,8 @@ package com.bitsycore.lib.pulse.test
 import com.bitsycore.lib.pulse.container.ContainerContract
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.yield
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -205,7 +204,7 @@ class ContainerTest {
 	}
 
 	@Test
-	fun consumableEffectDeliveredOnlyOnce() = runTest {
+	fun effectNotRedeliveredToSecondCollector() = runTest {
 		val container = TestContainer(
 			initialState = CounterContract.UiState(),
 			contract = CounterContract,
@@ -218,22 +217,16 @@ class ContainerTest {
 			}
 		)
 
-		// Emit effect
+		// Dispatch then collect — first subscriber gets it
 		container.dispatch(CounterContract.Intent.Reset)
-
-		// First collector gets it
 		val effect1 = container.effectFlow.first()
 		assertEquals(CounterContract.Effect.ShowToast("once"), effect1)
 
-		// Second collector should NOT get the same consumed effect
-		// We test by collecting with a timeout — if nothing arrives, the consumable worked
-		val collected = mutableListOf<CounterContract.Effect>()
-		val job = launch(UnconfinedTestDispatcher(testScheduler)) {
-			container.effectFlow.collect { collected.add(it) }
+		// Second subscriber: SharedFlow has replay=0, so nothing should arrive
+		val effect2 = withTimeoutOrNull(100) {
+			container.effectFlow.first()
 		}
-		// Give it a chance to collect
-		job.cancel()
-		assertTrue(collected.isEmpty(), "Second collector should not receive already-consumed effect")
+		assertTrue(effect2 == null, "Second collector should not receive previously delivered effect")
 	}
 
 	// ── HandleIntent (Side Effects) ────────────────────────────────────────────

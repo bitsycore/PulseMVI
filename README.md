@@ -7,13 +7,13 @@ Pulse separates UI state management into predictable, testable layers: a pure re
 
 ## Modules
 
-| Module             | Description                                   | Targets                                                 |
-|--------------------|-----------------------------------------------|---------------------------------------------------------|
-| `pulse`            | Core MVI container. Pure Kotlin + coroutines. | JVM, Android, iOS, macOS, Linux, Windows, watchOS, tvOS |
-| `pulse-viewmodel`  | AndroidX ViewModel integration.               | JVM, Android, iOS                                       |
-| `pulse-savedstate` | Auto-persist state via SavedStateHandle.      | JVM, Android, iOS                                       |
-| `pulse-compose`    | Compose Multiplatform extensions.             | JVM, Android, iOS                                       |
-| `pulse-test`       | Test utilities with synchronous dispatch.     | JVM, iOS, macOS, Linux, Windows                         |
+| Module             | Description                                   | Targets                         |
+|--------------------|-----------------------------------------------|---------------------------------|
+| `pulse`            | Core MVI container. Pure Kotlin + coroutines. | JVM, Android, iOS, JS, WasmJS   |
+| `pulse-viewmodel`  | AndroidX ViewModel integration.               | JVM, Android, iOS, JS, WasmJS   |
+| `pulse-savedstate` | Auto-persist state via SavedStateHandle.      | JVM, Android, iOS, JS, WasmJS   |
+| `pulse-compose`    | Compose Multiplatform extensions.             | JVM, Android, iOS, JS, WasmJS   |
+| `pulse-test`       | Test utilities with synchronous dispatch.     | JVM, Android, iOS, JS, WasmJS   |
 
 ### Dependency graph
 
@@ -76,10 +76,10 @@ object CounterContract : ContainerContract<CounterContract.UiState, CounterContr
 The ViewModel holds the container, defines state reductions, and handles side-effects.
 
 ```kotlin
-class CounterViewModel : PulseViewModel<UiState, Intent, Effect>(CounterContract) {
-
-    override val initialState: UiState
-        get() = UiState()
+class CounterViewModel : PulseViewModel<UiState, Intent, Effect>(
+    containerContract = CounterContract,
+    initialState = UiState()
+) {
 
     override fun reduce(state: UiState, intent: Intent): UiState = when (intent) {
         Intent.Increment -> state.copy(count = state.count + 1)
@@ -101,7 +101,7 @@ class CounterViewModel : PulseViewModel<UiState, Intent, Effect>(CounterContract
 ```kotlin
 @Composable
 fun CounterScreen(viewModel: CounterViewModel = viewModel { CounterViewModel() }) {
-    val state by viewModel.collectAsState()
+    val state by viewModel.collectAsStateWithLifecycle()
 
     viewModel.collectEffect { effect ->
         when (effect) {
@@ -110,16 +110,6 @@ fun CounterScreen(viewModel: CounterViewModel = viewModel { CounterViewModel() }
     }
 
     CounterContent(state, viewModel::dispatch)
-}
-
-@Composable
-fun CounterContent(state: UiState, dispatch: (Intent) -> Unit) {
-    Column {
-        Text("Count: ${state.count}")
-        Button(onClick = { dispatch(Intent.Increment) }) { Text("+") }
-        Button(onClick = { dispatch(Intent.Decrement) }) { Text("-") }
-        Button(onClick = { dispatch(Intent.Reset) })     { Text("Reset") }
-    }
 }
 ```
 
@@ -139,7 +129,7 @@ flowchart LR
 
 - `reduce(state, intent)` -- Pure, synchronous. Returns the next state. No side-effects.
 - `handleIntent(intent)` -- Suspend function for async work (network, database, etc.).
-- `emitEffect(effect)` -- Emits a one-shot event. Replay-safe: late collectors receive the last unconsumed effect without double-delivery.
+- `emitEffect(effect)` -- Emits a one-shot event (navigation, toasts, etc.). Effects are buffered but not replayed to late collectors.
 - `updateState { copy(...) }` -- Convenience for modifying state outside the reducer (e.g., inside callbacks).
 
 ### DebouncedDispatcher
@@ -171,9 +161,9 @@ interface ContainerHost<STATE, INTENT, EFFECT> {
 }
 ```
 
-### Effect replay
+### Effects
 
-Effects are wrapped internally in a `Consumable` -- a thread-safe one-shot wrapper. The backing `SharedFlow` replays the last N effects to late collectors (e.g., after configuration change), but each effect is delivered exactly once. The public API remains `Flow<EFFECT>`; consumers never handle `Consumable` directly.
+Effects are emitted via `emitEffect()` and delivered through a `SharedFlow`. They are fire-and-forget one-shot events — each effect is delivered to active collectors only. Effects are not replayed to late subscribers. Use `collectEffect` or `collectEffectWithLifecycle` in Compose to handle them.
 
 ## ViewModel integration
 
@@ -182,9 +172,10 @@ Effects are wrapped internally in a `Consumable` -- a thread-safe one-shot wrapp
 Wraps `Container` in an AndroidX `ViewModel`. The container's coroutine scope is tied to `viewModelScope`.
 
 ```kotlin
-class MyViewModel : PulseViewModel<MyState, MyIntent, MyEffect>(MyContract) {
-    override val initialState: MyState
-        get() = MyState()
+class MyViewModel : PulseViewModel<MyState, MyIntent, MyEffect>(
+    containerContract = MyContract,
+    initialState = MyState()
+) {
     override fun reduce(state: MyState, intent: MyIntent): MyState = ...
     override suspend fun handleIntent(intent: MyIntent) { ... }
 }
@@ -201,11 +192,10 @@ data class UiState(val count: Int = 0)
 class MyViewModel(savedStateHandle: SavedStateHandle) :
     PulseSavedStateViewModel<UiState, Intent, Effect>(
         containerContract = MyContract,
+        initialState = UiState(),
         savedStateHandle = savedStateHandle,
         serializer = UiState.serializer()
     ) {
-    override val initialState: UiState
-        get() = UiState()
     override fun reduce(state: UiState, intent: Intent): UiState = ...
 }
 ```
@@ -220,12 +210,12 @@ State survives process death and backstack eviction as long as the `SavedStateHa
 
 ## Compose extensions
 
-### collectAsState
+### collectAsStateWithLifecycle
 
 Lifecycle-aware state collection. Defaults to `Lifecycle.State.STARTED`.
 
 ```kotlin
-val state by viewModel.collectAsState()
+val state by viewModel.collectAsStateWithLifecycle()
 ```
 
 ### collectEffect
@@ -330,8 +320,10 @@ override fun reduce(state: UiState, intent: Intent): UiState = when (intent) {
 ### Setup
 
 ```kotlin
-class SearchViewModel : PulseViewModel<UiState, Intent, Effect>(SearchContract) {
-    override val initialState = UiState()
+class SearchViewModel : PulseViewModel<UiState, Intent, Effect>(
+    containerContract = SearchContract,
+    initialState = UiState()
+) {
 
     private val debouncer = DebouncedDispatcher(viewModelScope, ::dispatch)
 

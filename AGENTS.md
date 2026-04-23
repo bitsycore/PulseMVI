@@ -5,11 +5,11 @@ Kotlin Multiplatform MVI (Model-View-Intent) library.
 ## Project Structure
 
 ```
-pulse/              Core MVI container — pure Kotlin + coroutines (all KMP targets)
-pulse-viewmodel/    AndroidX ViewModel integration (Android, JVM, iOS)
-pulse-savedstate/   SavedStateHandle integration — auto-persist state (Android, JVM, iOS)
-pulse-compose/      Compose Multiplatform extensions (Android, JVM, iOS)
-pulse-test/         Testing utilities — TestContainer + assertions (all KMP targets)
+pulse/              Core MVI container — pure Kotlin + coroutines (JVM, Android, iOS, JS, WasmJS)
+pulse-viewmodel/    AndroidX ViewModel integration (JVM, Android, iOS, JS, WasmJS)
+pulse-savedstate/   SavedStateHandle integration — auto-persist state (JVM, Android, iOS, JS, WasmJS)
+pulse-compose/      Compose Multiplatform extensions (JVM, Android, iOS, JS, WasmJS)
+pulse-test/         Testing utilities — TestContainer + assertions (JVM, Android, iOS, JS, WasmJS)
 demo/               Desktop demo app (JVM)
 ```
 
@@ -41,11 +41,10 @@ demo → pulse-compose     → pulse
 - **Container** — core engine: takes `initialState` as constructor parameter; `dispatch(intent)` → `reduce()` → new state; `handleIntent()` for async side-effects; `emitEffect()` for one-shot events; supports `restoredState` for state restoration
 - **ContainerHost** — interface exposing `stateFlow`, `effectFlow`, `dispatch`
 - **DebouncedDispatcher** — standalone debounce engine: `dispatchDebounced()`, `cancel(key)`, `cancelAll()`, `clearHistory()`; thread-safe, composable with any dispatch function
-- **OneTimeConsumable** — thread-safe one-shot wrapper for effect replay without double-delivery
 - **ComponentContract** — lightweight sub-container with its own reducer (no effects)
 - **PulseViewModel** — AndroidX ViewModel wrapper around Container
 - **PulseSavedStateViewModel** — PulseViewModel + SavedStateHandle auto-persistence (STATE must be `@Serializable`)
-- **ComposeExtensions** — `collectAsState()`, `collectEffect()`, `onLifecycleIntent()`, `onCompositionIntent()`
+- **ComposeExtensions** — `collectAsStateWithLifecycle()`, `collectEffect()`, `collectEffectWithLifecycle()`, `onLifecycleIntent()`, `onCompositionIntent()`
 - **TestContainer** — test-friendly Container with `UnconfinedTestDispatcher`
 
 ## Screen Pattern (Compose)
@@ -53,7 +52,7 @@ demo → pulse-compose     → pulse
 ```kotlin
 @Composable
 fun XScreen(viewModel: XViewModel = viewModel { XViewModel() }) {
-    val state by viewModel.collectAsState()
+    val state by viewModel.collectAsStateWithLifecycle()
     viewModel.collectEffect { /* handle one-shot effects */ }
     XContent(state, viewModel::dispatch)
 }
@@ -73,11 +72,11 @@ data class UiState(val count: Int = 0)
 class MyViewModel(savedStateHandle: SavedStateHandle) :
     PulseSavedStateViewModel<UiState, Intent, Effect>(
         containerContract = MyContract,
+        initialState = UiState(),
         savedStateHandle = savedStateHandle,
         serializer = UiState.serializer()
     ) {
-    override val initialState: UiState
-        get() = UiState()
+    override fun reduce(state: UiState, intent: Intent): UiState = ...
 }
 
 // In Compose:
@@ -101,4 +100,4 @@ MyContract.containerTest(
 - Kotlin 2.3, KMP
 - Tabs for indentation
 - Package root: `com.bitsycore.lib.pulse`
-- Targets: pulse supports all major KMP targets (JVM, Android, iOS, macOS, Linux, Windows, watchOS, tvOS)
+- Targets: JVM, Android, iOS, JS, WasmJS

@@ -2,6 +2,7 @@ package com.bitsycore.lib.pulse.internal
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -24,6 +25,7 @@ class UntypedIntentBuilder<STATE : Any> internal constructor(
 	private val stateFlow: MutableStateFlow<STATE>,
 	private val coroutineScope: CoroutineScope,
 ) {
+	@PulseDsl
 	class HandlerScope internal constructor()
 
 	private val handlerScope = HandlerScope()
@@ -41,7 +43,7 @@ class UntypedIntentBuilder<STATE : Any> internal constructor(
 	}
 
 	internal fun build() {
-		reducer?.let { r -> stateFlow.value = stateFlow.value.r() }
+		reducer?.let { r -> stateFlow.update { it.r() } }
 		handler?.let { h -> coroutineScope.launch { handlerScope.h() } }
 	}
 }

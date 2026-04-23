@@ -8,24 +8,21 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 
 /**
- * Base class for MVI ViewModels.
+ * Core MVI engine.
  *
  * @param STATE  Immutable UI state type.
  * @param INTENT  Intent (user action or lifecycle event) type.
  * @param EFFECT  One-time Effect (navigation, toasts, etc.) type.
- *
- * The [containerContract] provides [ContainerContract.initialState], making the contract the single
- * source of truth for State, Intent, Effect, and the starting state value.
  *
  * Data flow:
  *   UI → dispatch(Intent) → reduce() → new State → UI recomposes
  *                        ↘ handleIntent() → async work → emitEffect() → Screen reacts
  */
 abstract class Container<STATE : Any, INTENT : Any, EFFECT : Any>(
-	val containerContract: ContainerContract<STATE, INTENT, EFFECT>,
+	protected val containerContract: ContainerContract<STATE, INTENT, EFFECT>,
 	initialState: STATE,
 	restoredState: STATE? = null,
-	val coroutineScope: CoroutineScope,
+	protected val coroutineScope: CoroutineScope,
 ) : ContainerHost<STATE, INTENT, EFFECT> {
 
 	private val stateMutableFlow = MutableStateFlow(restoredState ?: initialState)

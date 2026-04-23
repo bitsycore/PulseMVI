@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.bitsycore.lib.pulse.container.ContainerContract
 import com.bitsycore.lib.pulse.viewmodel.PulseViewModel
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
@@ -12,7 +13,7 @@ import kotlinx.serialization.json.Json
  * A [PulseViewModel] that automatically persists and restores [STATE] via [SavedStateHandle].
  *
  * On creation, if a previously saved state exists in [savedStateHandle], it is deserialized
- * and used as the initial state (overriding [ContainerContract.initialState]).
+ * and used as the initial state (overriding [initialState]).
  *
  * On every state change, the new state is serialized to JSON and written to [savedStateHandle],
  * ensuring survival across process death and backstack eviction.
@@ -23,9 +24,10 @@ import kotlinx.serialization.json.Json
  * ```kotlin
  * class MyViewModel(savedStateHandle: SavedStateHandle) :
  *     PulseSavedStateViewModel<UiState, Intent, Effect>(
- *         MyContract,
- *         savedStateHandle,
- *         UiState.serializer()
+ *         containerContract = MyContract,
+ *         initialState = UiState(),
+ *         savedStateHandle = savedStateHandle,
+ *         serializer = UiState.serializer()
  *     )
  * ```
  */
@@ -44,7 +46,7 @@ abstract class PulseSavedStateViewModel<STATE : Any, INTENT : Any, EFFECT : Any>
 ) {
 	init {
 		viewModelScope.launch {
-			stateFlow.collect { state ->
+			stateFlow.drop(1).collect { state ->
 				savedStateHandle[savedStateKey] = Json.encodeToString(serializer, state)
 			}
 		}

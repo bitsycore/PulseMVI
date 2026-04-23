@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 abstract class PulseViewModel<STATE : Any, INTENT : Any, EFFECT : Any>(
-	val containerContract: ContainerContract<STATE, INTENT, EFFECT>,
+	private val containerContract: ContainerContract<STATE, INTENT, EFFECT>,
 	initialState : STATE,
 	restoredState: STATE? = null
 ) : ViewModel(), ContainerHost<STATE, INTENT, EFFECT> {
